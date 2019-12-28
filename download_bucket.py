@@ -4,9 +4,13 @@ import sys
 import xml.etree.ElementTree as ElementTree
 
 import requests
+import re
 
 from os import path
 
+def get_namespace(element):
+    m = re.match(r'\{.*\}', element.tag)
+    return m.group(0) if m else ''
 
 def create_out_folder():
     out_folder = ""
@@ -34,10 +38,10 @@ def download_file(bucket_url, url, out_folder):
 def parse_xml(bucket_list_result, bucket_url, out_folder):
     tree = ElementTree.parse(bucket_list_result)
     root = tree.getroot()
-
+    namespace = get_namespace(root)
     for elem in root:
         for sub_elem in elem:
-            if sub_elem.tag == 'Key' and '.' in sub_elem.text:
+            if sub_elem.tag == namespace+'Key' and '.' in sub_elem.text:
                 download_file(bucket_url, sub_elem.text, out_folder)
 
 
